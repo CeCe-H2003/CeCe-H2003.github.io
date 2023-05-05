@@ -1,24 +1,168 @@
-<!doctype HTML>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>New York Historical Facts</title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-<body>
-    <div class="formatText">
-        <h1>New York Historical Facts</h1>
-        <h2>Fact 1</h2>
-        <h3>Used to be called New Amsterdam</h3>
-            <section id="facts">
-                <p>The Dutch came to Manhattan first and established a colony, New Amsterdam, in the 1620s. Due to the unpopularity of Governor Peter Stuyvesant, however, its inhabitants refused to fight off the English in 1664. Since the Duke of York was leading the mission to capture the island, the colony was renamed in his honour!</p>
-            </section>    
-        <img src="New-Amsterdam-by-Nicolaes-Visscher-in-1656.png" alt="Image in New Amsterdam" width="500" />
-        <h2>Fact 2</h2>
-        <h3>Popularized bingo</h3>
-            <section id="facts">
-                <p>The people of New York have always been trendsetters, and travelling salesman Edwin Lowe was no exception. In 1929, Lowe came upon a European game called Beano, which involved beans, number combinations, and hand-stamped cards. Intrigued, he began making his own version to mass-produce. And according to a feature by Foxy Bingo on the game's origins, it was in Lowe's hometown of New York, while he was testing this version with friends, that one of them accidentally cried out, "Bingo!" The rest, as they say, is history.</p>
-            </section>
-         <img src="russkoe-loto-5875700_1920.jpg" alt="Image of bingo" width="500" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaflet</title>
+    <!-- Leaflet css -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+      integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+      crossorigin=""
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        width: 100%;
+        height: 100vh;
+      }
+      .custom-icon {
+        background: none;
+        border: none;
+        text-align: center;
+      }
+      .marker-title {
+        font-size: 14px;
+        font-weight: bold;
+        /* text-shadow: 1px 1px 1px #fff; */
+        background: #000;
+        color: #fff;
+        display: block;
+        padding: 0.75rem 1.2rem;
+        text-align: center;
+        width: fit-content;
+        border-radius: 9999px;
+      }
+      .leaflet-popup form {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        color: #333;
+        width: 220px;
+        box-sizing: border-box;
+        padding: 10px;
+        background-color: #f8f8f8;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
 
-</body>
+      .leaflet-popup label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      .leaflet-popup input[type="text"],
+      .leaflet-popup textarea {
+        width: 100%;
+        padding: 5px;
+        box-sizing: border-box;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background-color: #fff;
+      }
+
+      .leaflet-popup input[type="text"] {
+        margin-bottom: 10px;
+      }
+
+      .leaflet-popup textarea {
+        height: 60px;
+        margin-bottom: 10px;
+        resize: none;
+      }
+
+      .leaflet-popup .save-button {
+        display: inline-block;
+        padding: 6px 12px;
+        font-size: 14px;
+        font-weight: bold;
+        color: #fff;
+        background-color: #3c8dbc;
+        border: 1px solid #357ebd;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .leaflet-popup .save-button:hover {
+        background-color: #2c6a99;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+  </body>
 </html>
+<!--Leaflet js -->
+<script
+  src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+  integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+  crossorigin=""
+></script>
+<script>
+  // Map Initialization
+
+  var map = L.map("map").setView([40.7367, -73.8203], 12);
+
+  // OSM layer
+  var osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  });
+  osm.addTo(map);
+
+  // Add a marker on double click
+
+  map.on("dblclick", function (e) {
+    console.log(e.latlng);
+    const marker = L.marker(e.latlng, { draggable: true }).addTo(map);
+    // Create a popup with input fields for title and description
+    const popupContent = `
+        <form>
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required>
+            <br>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required></textarea>
+            <br>
+            <button type="button" class="save-button">Save</button>
+        </form>
+    `;
+
+    marker.bindPopup(popupContent).openPopup();
+
+    // Save the title and description on click
+    const saveButton = document.querySelector(".leaflet-popup .save-button");
+    saveButton.addEventListener("click", function () {
+      savePopupData(marker);
+    });
+  });
+
+  // Save title and description and display on hover and click
+  function savePopupData(marker) {
+    console.log(marker);
+    const form = document.querySelector(".leaflet-popup form");
+    const title = form.querySelector("#title").value;
+    const description = form.querySelector("#description").value;
+
+    // Create a custom icon with the title
+    const customIcon = L.divIcon({
+      className: "custom-icon",
+      html: `<div class="marker-title">${title}</div>`,
+    });
+
+    // Update the marker icon
+    marker.setIcon(customIcon);
+
+    // Bind the description as a tooltip
+    marker.unbindTooltip().bindTooltip(description, { direction: "top" });
+
+    // Close the popup
+    marker.closePopup();
+  }
+</script>
